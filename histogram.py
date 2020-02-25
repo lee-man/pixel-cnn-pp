@@ -12,6 +12,10 @@ from utils import *
 from model import * 
 from PIL import Image
 
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
+import seaborn as sns
+
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
@@ -88,16 +92,26 @@ if args.load_params:
 torch.cuda.synchronize()
 model.eval()
 test_loss = 0.
+bpd_array = []
 with torch.no_grad():
     for batch_idx, (input,_) in enumerate(test_loader):
         input = input.to('cuda')
         output = model(input)
         loss = loss_op(input, output)
+        bpd_array.append(loss.data.item()/(args.batch_size*np.prod(obs)*np.log(2.)))
         test_loss += loss.data.item()
         del loss, output
         deno = batch_idx * args.batch_size * np.prod(obs) * np.log(2.)
         progress_bar(batch_idx, len(test_loader), 'BPD: %.3f'
                 % (test_loss/ deno))
 
-    
+# plot histogram
+n, bins, patches = plt.hist(x=bpd_array, bins='auto', color='#0504aa', histtype='bar', alpha=0.7, rwidth=0.85)
+plt.grid(axis='y', alpha=0.75)
+plt.xlabel('Negetive loglikelihood(/Bit per dimension)')
+plt.ylabel('Frequency')
+plt.title('Pixel CNN on Cifar-10')
+plt.savefig('pcnn-cifar10.png')
+
+ 
 
