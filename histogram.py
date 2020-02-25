@@ -39,7 +39,7 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 
-model_name = 'pcnn_lr:{:.5f}_nr-resnet{}_nr-filters{}'.format(args.lr, args.nr_resnet, args.nr_filters)
+model_name = 'pcnn:nr-resnet{}_nr-filters{}'.format(args.nr_resnet, args.nr_filters)
 # assert not os.path.exists(os.path.join('runs', model_name)), '{} already exists!'.format(model_name)
 # writer = SummaryWriter(log_dir=os.path.join('runs', model_name))
 
@@ -96,7 +96,7 @@ with torch.no_grad():
         test_loss += loss.data.item()
         del loss, output
         deno = batch_idx * args.batch_size * np.prod(obs) * np.log(2.)
-        progress_bar(batch_idx, len(testloader), 'BPD: %.3f'
+        progress_bar(batch_idx, len(test_loader), 'BPD: %.3f'
                 % (test_loss/ deno))
 
     
